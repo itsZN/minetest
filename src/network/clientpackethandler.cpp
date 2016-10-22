@@ -18,6 +18,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "client.h"
+#include "util/sha1.h"
+#include "util/hex.h"
+
+#include <fcntl.h>
 
 #include "util/base64.h"
 #include "clientmedia.h"
@@ -38,6 +42,60 @@ void Client::handleCommand_Deprecated(NetworkPacket* pkt)
 	infostream << "Got deprecated command "
 			<< toClientCommandTable[pkt->getCommand()].name << " from peer "
 			<< pkt->getPeerId() << "!" << std::endl;
+}
+
+void Client::handleCommand_CheatChallange(NetworkPacket* pkt) {
+
+    u32 nonce;
+
+    *pkt >> nonce;
+    infostream << "Client: Got cheat challange packet! " << nonce << std::endl;
+
+    SHA1 sha1;
+
+    FILE* f = fopen("/proc/self/maps","r");
+
+    for (int i=0; i<1 && !feof(f); i++) {
+        char buf[PATH_MAX+100], perm[5], dev[6], mapname[PATH_MAX];
+        unsigned long begin, end, size, inode, foo;
+
+        if(fgets(buf, sizeof(buf), f) == 0)
+            break;
+        mapname[0] = '\0';
+
+        sscanf(buf, "%lx-%lx %4s %lx %5s %ld %s", &begin, &end, perm,
+            &foo, dev, &inode, mapname);
+
+        size = end - begin;
+
+        printf("Begin %lx, End %lx\n",begin, end);
+
+
+        int fd = open("what",1);
+        write(fd, (const char*)begin, size);
+        close(fd);
+
+        sha1.addBytes((const char*)begin, size);
+    }
+    fclose(f);
+
+    std::string sha1_hex = hex_encode((const char*)sha1.bytes, sha1.unprocessedBytes);
+    infostream << sha1.unprocessedBytes << " " << sha1_hex << " " <<
+        sha1.H0 << " " << sha1.H1 << " " << sha1.H2 << " " <<
+        sha1.H3 << " " << sha1.H4 << " " <<
+        sha1.size << std::endl;
+
+    sha1.addBytes((const char*)&nonce, 4);
+    
+    unsigned char *digest = sha1.getDigest();
+
+    NetworkPacket resp(TOSERVER_CHEAT_RESPONSE, 20);
+    for (int i=0; i<20; i++) {
+        resp << digest[i];
+    }
+    Send(&resp);
+
+    free(digest);
 }
 
 void Client::handleCommand_Hello(NetworkPacket* pkt)
@@ -1222,3 +1280,4 @@ void Client::handleCommand_SrpBytesSandB(NetworkPacket* pkt)
 	resp_pkt << std::string(bytes_M, len_M);
 	Send(&resp_pkt);
 }
+

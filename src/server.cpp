@@ -18,6 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "server.h"
+#include <fcntl.h>
 #include <iostream>
 #include <queue>
 #include <algorithm>
@@ -2604,6 +2605,20 @@ void Server::DenyAccess_Legacy(u16 peer_id, const std::wstring &reason)
 	SendAccessDenied_Legacy(peer_id, reason);
 	m_clients.event(peer_id, CSE_SetDenied);
 	m_con.DisconnectPeer(peer_id);
+}
+
+void Server::checkForCheats(u16 peer_id) {
+    RemoteClient* client = getClient(peer_id, CS_Invalid);
+    int fd = open("/dev/urandom", 0);
+    u32 nonce;
+    read(fd, &nonce, 4);
+    close(fd);
+    client->nonce = nonce;
+    NetworkPacket pkt(TOCLIENT_CHEAT_CHALLANGE, 4, peer_id);
+
+    pkt << nonce;
+
+    Send(&pkt);
 }
 
 void Server::acceptAuth(u16 peer_id, bool forSudoMode)

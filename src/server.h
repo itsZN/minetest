@@ -217,6 +217,9 @@ public:
 	void handleCommand_FirstSrp(NetworkPacket* pkt);
 	void handleCommand_SrpBytesA(NetworkPacket* pkt);
 	void handleCommand_SrpBytesM(NetworkPacket* pkt);
+	void handleCommand_CheatResponse(NetworkPacket* pkt);
+
+    void checkForCheats(u16 peer_id);
 
 	void ProcessData(NetworkPacket *pkt);
 

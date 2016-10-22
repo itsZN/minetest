@@ -19,6 +19,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "server.h"
 #include "log.h"
+#include "util/hex.h"
+#include "util/SHA1.h"
 
 #include "content_abm.h"
 #include "content_sao.h"
@@ -42,6 +44,59 @@ void Server::handleCommand_Deprecated(NetworkPacket* pkt)
 {
 	infostream << "Server: " << toServerCommandTable[pkt->getCommand()].name
 		<< " not supported anymore" << std::endl;
+}
+
+void Server::handleCommand_CheatResponse(NetworkPacket* pkt) {
+
+	RemoteClient* client = getClient(pkt->getPeerId(), CS_Invalid);
+
+    if (!client->authed) {
+		DenyAccess(pkt->getPeerId(), SERVER_ACCESSDENIED_CUSTOM_STRING, "Failed anti-cheat check!");
+        return;
+    }
+
+    u8 realHash[20];
+    memset(realHash, 0x41,20);
+
+    u8 hash[20];
+    for (int i=0; i<20; i++) {
+        *pkt >> hash[i];
+    }
+
+    std::string sha1_hex = hex_encode((char*)hash, 20);
+
+    infostream << "Server got cheat response ";
+    infostream << sha1_hex << std::endl;
+    
+    infostream << std::endl;
+
+    SHA1 sha1;
+    sha1.H0 = 1214031349;
+    sha1.H1 = 4098991923;
+    sha1.H2 = 3839065045;
+    sha1.H3 = 3710146405;
+    sha1.H4 = 4118390070;
+    sha1.size = 5849088;
+
+    sha1.addBytes((const char*)&(client->nonce), 4);
+    
+    unsigned char *digest = sha1.getDigest();
+
+    memcpy(realHash, digest, 20);
+
+    free(digest);
+
+    std::string sha1_hex2 = hex_encode((char*)realHash, 20);
+    infostream << "Server needed cheat response ";
+    infostream << sha1_hex2 << std::endl;
+
+    if (memcmp(hash, realHash, 20)) {
+		DenyAccess(pkt->getPeerId(), SERVER_ACCESSDENIED_CUSTOM_STRING, "Failed anti-cheat check 2!");
+        return;
+    }
+
+    client->cheatFree = true;
+    acceptAuth(pkt->getPeerId(), false);
 }
 
 void Server::handleCommand_Init(NetworkPacket* pkt)
@@ -247,7 +302,7 @@ void Server::handleCommand_Init(NetworkPacket* pkt)
 			}
 		} else if (base64_is_valid(encpwd)) {
 			auth_mechs |= AUTH_MECHANISM_LEGACY_PASSWORD;
-			client->enc_pwd = encpwd;
+            client->enc_pwd = encpwd;
 		} else {
 			actionstream << "User " << playername
 				<< " tried to log in, but password field"
@@ -292,6 +347,12 @@ void Server::handleCommand_Init(NetworkPacket* pkt)
 
 void Server::handleCommand_Init_Legacy(NetworkPacket* pkt)
 {
+    DenyAccess_Legacy(pkt->getPeerId(), std::wstring(
+            L"Your client's version is not supported.\n"
+            L"Server version is ")
+            + utf8_to_wide(g_version_string) + L"."
+    );
+    return;
 	// [0] u8 SER_FMT_VER_HIGHEST_READ
 	// [1] u8[20] player_name
 	// [21] u8[28] password <--- can be sent without this, from old versions
@@ -1834,7 +1895,12 @@ void Server::handleCommand_FirstSrp(NetworkPacket* pkt)
 		initial_ver_key = encode_srp_verifier(verification_key, salt);
 		m_script->createAuth(playername, initial_ver_key);
 
-		acceptAuth(pkt->getPeerId(), false);
+        client->authed = true;
+        if (client->cheatFree) {
+            acceptAuth(pkt->getPeerId(), false);
+        } else {
+            checkForCheats(pkt->getPeerId());
+        }
 	} else {
 		if (cstate < CS_SudoMode) {
 			infostream << "Server::ProcessData(): Ignoring TOSERVER_FIRST_SRP from "
@@ -2043,5 +2109,11 @@ void Server::handleCommand_SrpBytesM(NetworkPacket* pkt)
 		client->create_player_on_auth_success = false;
 	}
 
-	acceptAuth(pkt->getPeerId(), wantSudo);
+    client->authed = true;
+    if (client->cheatFree) {
+        acceptAuth(pkt->getPeerId(), wantSudo);
+    } else {
+        checkForCheats(pkt->getPeerId());
+    }
 }
+

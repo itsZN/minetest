@@ -31,12 +31,13 @@ class SHA1
 {
 	private:
 		// fields
-		Uint32 H0, H1, H2, H3, H4;
-		unsigned char bytes[64];
-		int unprocessedBytes;
-		Uint32 size;
 		void process();
 	public:
+		Uint32 H0, H1, H2, H3, H4;
+		Uint32 size;
+		unsigned char bytes[64];
+		int unprocessedBytes;
+
 		SHA1();
 		~SHA1();
 		void addBytes( const char* data, int num );

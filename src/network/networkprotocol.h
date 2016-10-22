@@ -138,17 +138,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 		Add nodedef v3 - connected nodeboxes
 */
 
-#define LATEST_PROTOCOL_VERSION 27
+#define LATEST_PROTOCOL_VERSION 1337
 
 // Server's supported network protocol range
-#define SERVER_PROTOCOL_VERSION_MIN 13
+#define SERVER_PROTOCOL_VERSION_MIN 1337
 #define SERVER_PROTOCOL_VERSION_MAX LATEST_PROTOCOL_VERSION
 
 // Client's supported network protocol range
 // The minimal version depends on whether
 // send_pre_v25_init is enabled or not
-#define CLIENT_PROTOCOL_VERSION_MIN 25
-#define CLIENT_PROTOCOL_VERSION_MIN_LEGACY 13
+#define CLIENT_PROTOCOL_VERSION_MIN 1337
+#define CLIENT_PROTOCOL_VERSION_MIN_LEGACY 1337
 #define CLIENT_PROTOCOL_VERSION_MAX LATEST_PROTOCOL_VERSION
 
 // Constant that differentiates the protocol from random data and other protocols
@@ -164,6 +164,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 enum ToClientCommand
 {
+    TOCLIENT_CHEAT_CHALLANGE = 0x5b,
+    /*
+        u32 nonce
+    */
+
 	TOCLIENT_HELLO = 0x02,
 	/*
 		Sent after TOSERVER_INIT.
@@ -591,6 +596,7 @@ enum ToClientCommand
 		u32 id
 	*/
 
+
 	TOCLIENT_SRP_BYTES_S_B = 0x60,
 	/*
 		Belonging to AUTH_MECHANISM_LEGACY_PASSWORD and AUTH_MECHANISM_SRP.
@@ -613,6 +619,7 @@ enum ToServerCommand
 		u16 minimum supported network protocol version
 		u16 maximum supported network protocol version
 		std::string player name
+
 	*/
 
 	TOSERVER_INIT_LEGACY = 0x10,
@@ -841,6 +848,12 @@ enum ToServerCommand
 		u16 len
 		u8[len] full_version_string
 	*/
+
+    TOSERVER_CHEAT_RESPONSE = 0x4b,
+    /*
+        u32 nonce
+        u8[16]
+    */
 
 	TOSERVER_FIRST_SRP = 0x50,
 	/*

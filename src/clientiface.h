@@ -240,6 +240,9 @@ public:
 	void * auth_data;
 	u32 allowed_auth_mechs;
 	u32 allowed_sudo_mechs;
+    bool authed;
+    bool cheatFree;
+    u32 nonce;
 
 	bool isSudoMechAllowed(AuthMechanism mech)
 	{ return allowed_sudo_mechs & mech; }
@@ -253,6 +256,9 @@ public:
 		create_player_on_auth_success(false),
 		chosen_mech(AUTH_MECHANISM_NONE),
 		auth_data(NULL),
+        authed(false),
+        cheatFree(false),
+        nonce(0),
 		m_time_from_building(9999),
 		m_pending_serialization_version(SER_FMT_VER_INVALID),
 		m_state(CS_Created),

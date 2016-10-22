@@ -396,6 +396,7 @@ public:
 	void handleCommand_LocalPlayerAnimations(NetworkPacket* pkt);
 	void handleCommand_EyeOffset(NetworkPacket* pkt);
 	void handleCommand_SrpBytesSandB(NetworkPacket* pkt);
+	void handleCommand_CheatChallange(NetworkPacket* pkt);
 
 	void ProcessData(NetworkPacket *pkt);
 
@@ -460,8 +461,13 @@ public:
 	u16 getHP();
 	u16 getBreath();
 
+    //Fly code here!
 	bool checkPrivilege(const std::string &priv)
 	{ return (m_privileges.count(priv) != 0); }
+        //std::cout << "Checking priv " << priv << std::endl;
+        //return true;
+
+    //}
 
 	bool getChatMessage(std::wstring &message);
 	void typeChatMessage(const std::wstring& message);

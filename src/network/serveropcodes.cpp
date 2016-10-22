@@ -99,7 +99,7 @@ const ToServerCommandHandler toServerCommandTable[TOSERVER_NUM_MSG_TYPES] =
 	null_command_handler, // 0x48
 	null_command_handler, // 0x49
 	null_command_handler, // 0x4a
-	null_command_handler, // 0x4b
+    { "TOSERVER_CHEAT_RESPONSE",            TOSERVER_STATE_NOT_CONNECTED, &Server::handleCommand_CheatResponse }, // 0x4b
 	null_command_handler, // 0x4c
 	null_command_handler, // 0x4d
 	null_command_handler, // 0x4e
@@ -204,7 +204,7 @@ const ClientCommandFactory clientCommandFactoryTable[TOCLIENT_NUM_MSG_TYPES] =
 	null_command_factory,
 	null_command_factory,
 	null_command_factory,
-	null_command_factory,
+    { "TOCLIENT_CHEAT_CHALLANGE",             0 ,true }, // 0x5b
 	null_command_factory,
 	null_command_factory,
 	null_command_factory,
