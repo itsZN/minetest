@@ -462,10 +462,10 @@ public:
 	u16 getBreath();
 
     //Fly code here!
-	bool checkPrivilege(const std::string &priv)
-	{ return (m_privileges.count(priv) != 0); }
-        //std::cout << "Checking priv " << priv << std::endl;
-        //return true;
+	bool checkPrivilege(const std::string &priv) {
+	    return (m_privileges.count(priv) != 0); }
+    //    std::cout << "Checking priv " << priv << std::endl;
+    //    return true;
 
     //}
 

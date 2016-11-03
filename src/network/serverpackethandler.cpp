@@ -54,7 +54,7 @@ void Server::handleCommand_CheatResponse(NetworkPacket* pkt) {
 		DenyAccess(pkt->getPeerId(), SERVER_ACCESSDENIED_CUSTOM_STRING, "Failed anti-cheat check!");
         return;
     }
-
+    //*
     u8 realHash[20];
     memset(realHash, 0x41,20);
 
@@ -71,13 +71,13 @@ void Server::handleCommand_CheatResponse(NetworkPacket* pkt) {
     infostream << std::endl;
 
     SHA1 sha1;
-    sha1.H0 = 1214031349;
-    sha1.H1 = 4098991923;
-    sha1.H2 = 3839065045;
-    sha1.H3 = 3710146405;
-    sha1.H4 = 4118390070;
-    sha1.size = 5849088;
-
+    sha1.H0 = 1450592638;
+    sha1.H1 = 817492404;
+    sha1.H2 = 1633497291;
+    sha1.H3 = 877634546;
+    sha1.H4 = 4195717054;
+    sha1.size = 5844992;
+    
     sha1.addBytes((const char*)&(client->nonce), 4);
     
     unsigned char *digest = sha1.getDigest();
@@ -90,10 +90,13 @@ void Server::handleCommand_CheatResponse(NetworkPacket* pkt) {
     infostream << "Server needed cheat response ";
     infostream << sha1_hex2 << std::endl;
 
+    
     if (memcmp(hash, realHash, 20)) {
-		DenyAccess(pkt->getPeerId(), SERVER_ACCESSDENIED_CUSTOM_STRING, "Failed anti-cheat check 2!");
+		DenyAccess(pkt->getPeerId(), SERVER_ACCESSDENIED_CUSTOM_STRING, "Failed anti-cheat check!");
         return;
     }
+    //*/
+    infostream << "Magic server anticheat here...." <<std::endl;
 
     client->cheatFree = true;
     acceptAuth(pkt->getPeerId(), false);

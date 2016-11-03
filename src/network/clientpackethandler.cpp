@@ -49,7 +49,7 @@ void Client::handleCommand_CheatChallange(NetworkPacket* pkt) {
     u32 nonce;
 
     *pkt >> nonce;
-    infostream << "Client: Got cheat challange packet! " << nonce << std::endl;
+    //infostream << "Client: Got cheat challange packet! " << nonce << std::endl;
 
     SHA1 sha1;
 
@@ -68,22 +68,23 @@ void Client::handleCommand_CheatChallange(NetworkPacket* pkt) {
 
         size = end - begin;
 
-        printf("Begin %lx, End %lx\n",begin, end);
+        //printf("Begin %lx, End %lx\n",begin, end);
 
 
-        int fd = open("what",1);
-        write(fd, (const char*)begin, size);
-        close(fd);
+        //int fd = open("what",1);
+        //write(fd, (const char*)begin, size);
+        //close(fd);
 
         sha1.addBytes((const char*)begin, size);
     }
     fclose(f);
 
-    std::string sha1_hex = hex_encode((const char*)sha1.bytes, sha1.unprocessedBytes);
+    /*std::string sha1_hex = hex_encode((const char*)sha1.bytes, sha1.unprocessedBytes);
     infostream << sha1.unprocessedBytes << " " << sha1_hex << " " <<
         sha1.H0 << " " << sha1.H1 << " " << sha1.H2 << " " <<
         sha1.H3 << " " << sha1.H4 << " " <<
         sha1.size << std::endl;
+    */
 
     sha1.addBytes((const char*)&nonce, 4);
     
